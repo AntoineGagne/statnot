@@ -258,7 +258,7 @@ class NotificationFetcher(dbus.service.Object):
 
     @dbus.service.method("org.freedesktop.Notifications", in_signature='', out_signature='as')
     def GetCapabilities(self):
-        return ("body")
+        return "body"
 
     @dbus.service.signal('org.freedesktop.Notifications', signature='uu')
     def NotificationClosed(self, id_in, reason_in):
@@ -270,7 +270,7 @@ class NotificationFetcher(dbus.service.Object):
 
     @dbus.service.method("org.freedesktop.Notifications", in_signature='', out_signature='ssss')
     def GetServerInformation(self):
-        return ("statnot", "http://code.k2h.se", "0.0.2", "1")
+        return "statnot", "http://code.k2h.se", "0.0.2", "1"
 
 
 def _parse_arguments():
