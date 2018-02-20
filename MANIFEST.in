@@ -1,0 +1,3 @@
+include README.rst tox.ini Makefile LICENSE.txt
+
+global-exclude *.py[co]

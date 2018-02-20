@@ -1,32 +1,37 @@
-#!/usr/bin/env python
+"""
+statnot - Status and Notifications
 
-#
-#   statnot - Status and Notifications
-#
-#   Lightweight notification-(to-become)-deamon intended to be used
-#   with lightweight WMs, like dwm.
-#   Receives Desktop Notifications (including libnotify / notify-send)
-#   See: http://www.galago-project.org/specs/notification/0.9/index.html
-#
-#   Note: VERY early prototype, to get feedback.
-#
-#   Copyright (c) 2009-2011 by the authors
-#   http://code.k2h.se
-#   Please report bugs or feature requests by e-mail.
-#
-#   This program is free software; you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
-#   (at your option) any later version.
-#
-#   This program is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+Lightweight notification-(to-become)-deamon intended to be used
+with lightweight WMs, like dwm.
+Receives Desktop Notifications (including libnotify / notify-send)
+
+:copyright: (c) 2009-2011 by the authors
+
+.. seealso::
+
+    http://www.galago-project.org/specs/notification/0.9/index.html
+
+.. note::
+
+    VERY early prototype, to get feedback.
+
+http://code.k2h.se
+Please report bugs or feature requests by e-mail.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
 
 import dbus
 import dbus.service
@@ -247,7 +252,7 @@ class NotificationFetcher(dbus.service.Object):
     def GetServerInformation(self):
       return ("statnot", "http://code.k2h.se", "0.0.2", "1")
 
-if __name__ == '__main__':
+def main():
     for curarg in sys.argv[1:]:
         if curarg in ('-v', '--version'):
             print "%s CURVERSION" % sys.argv[0]
@@ -316,4 +321,3 @@ if __name__ == '__main__':
 
     while 1:
         context.iteration(True)
-
