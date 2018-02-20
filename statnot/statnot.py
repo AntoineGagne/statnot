@@ -190,7 +190,7 @@ def message_thread(dummy):
     last_notification_update = 0
     current_notification_text = ''
 
-    while 1:
+    while True:
         notif = next_notification()
         current_time = time.time()
         update_status = False
@@ -212,7 +212,7 @@ def message_thread(dummy):
                 next_notification(True)
                 notif = next_notification()
 
-            if update_status == True:
+            if update_status:
                 last_notification_update = current_time
 
         if current_time > last_status_update + STATUS_UPDATE_INTERVAL:
@@ -283,7 +283,6 @@ def _parse_arguments():
             textwrap.dedent(
                 '''
                 configuration:
-
                   A file can be read to set the configuration.
                   This configuration file must be written in valid python,
                   which will be read if the filename is given on the command line.
@@ -360,5 +359,5 @@ def main():
     context = gobject.MainLoop().get_context()
     thread.start_new_thread(message_thread, (None,))
 
-    while 1:
+    while True:
         context.iteration(True)
