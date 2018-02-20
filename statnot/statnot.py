@@ -32,7 +32,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-
 import dbus
 import dbus.service
 import dbus.mainloop.glib
@@ -49,13 +48,14 @@ import re
 #
 # See helpstring below for what each setting does
 
-DEFAULT_NOTIFY_TIMEOUT = 3000 # milliseconds
-MAX_NOTIFY_TIMEOUT = 5000 # milliseconds
-NOTIFICATION_MAX_LENGTH = 100 # number of characters
-STATUS_UPDATE_INTERVAL = 2.0 # seconds
+DEFAULT_NOTIFY_TIMEOUT = 3000  # milliseconds
+MAX_NOTIFY_TIMEOUT = 5000  # milliseconds
+NOTIFICATION_MAX_LENGTH = 100  # number of characters
+STATUS_UPDATE_INTERVAL = 2.0  # seconds
 STATUS_COMMAND = ["/bin/sh", "%s/.statusline.sh" % os.getenv("HOME")]
-USE_STATUSTEXT=True
-QUEUE_NOTIFICATIONS=True
+USE_STATUSTEXT = True
+QUEUE_NOTIFICATIONS = True
+
 
 # dwm
 def update_text(text):
@@ -63,12 +63,14 @@ def update_text(text):
     first_line = text.splitlines()[0] if text else ''
     subprocess.call(["xsetroot", "-name", first_line])
 
+
 # ===== CONFIGURATION END =====
 
 def _getconfigvalue(configmodule, name, default):
     if hasattr(configmodule, name):
         return getattr(configmodule, name)
     return default
+
 
 def readconfig(filename):
     import imp
@@ -84,29 +86,33 @@ def readconfig(filename):
         if hasattr(config, setting):
             globals()[setting] = getattr(config, setting)
 
+
 def strip_tags(value):
-  "Return the given HTML with all tags stripped."
-  return re.sub(r'<[^>]*?>', '', value)
+    "Return the given HTML with all tags stripped."
+    return re.sub(r'<[^>]*?>', '', value)
+
 
 # from http://snipplr.com/view/19472/decode-html-entities/
 # also on http://snippets.dzone.com/posts/show/4569
 def substitute_entity(match):
-  ent = match.group(3)
-  if match.group(1) == "#":
-    if match.group(2) == '':
-      return unichr(int(ent))
-    elif match.group(2) == 'x':
-      return unichr(int('0x'+ent, 16))
-  else:
-    cp = n2cp.get(ent)
-    if cp:
-      return unichr(cp)
+    ent = match.group(3)
+    if match.group(1) == "#":
+        if match.group(2) == '':
+            return unichr(int(ent))
+        elif match.group(2) == 'x':
+            return unichr(int('0x' + ent, 16))
     else:
-      return match.group()
+        cp = n2cp.get(ent)
+        if cp:
+            return unichr(cp)
+        else:
+            return match.group()
+
 
 def decode_htmlentities(string):
-  entity_re = re.compile(r'&(#?)(x?)(\w+);')
-  return entity_re.subn(substitute_entity, string)[0]
+    entity_re = re.compile(r'&(#?)(x?)(\w+);')
+    return entity_re.subn(substitute_entity, string)[0]
+
 
 # List of not shown notifications.
 # Array of arrays: [id, text, timeout in s]
@@ -116,16 +122,18 @@ def decode_htmlentities(string):
 notification_queue = []
 notification_queue_lock = thread.allocate_lock()
 
+
 def add_notification(notif):
     with notification_queue_lock:
         for index, n in enumerate(notification_queue):
-            if n[0] == notif[0]: # same id, replace instead of queue
+            if n[0] == notif[0]:  # same id, replace instead of queue
                 n[1:] = notif[1:]
                 return
 
         notification_queue.append(notif)
 
-def next_notification(pop = False):
+
+def next_notification(pop=False):
     # No need to be thread safe here. Also most common scenario
     if not notification_queue:
         return None
@@ -144,7 +152,8 @@ def next_notification(pop = False):
         else:
             return notification_queue[0]
 
-def get_statustext(notification = ''):
+
+def get_statustext(notification=''):
     output = ''
     try:
         if not notification:
@@ -165,6 +174,7 @@ def get_statustext(notification = ''):
         output = notification
 
     return output
+
 
 def message_thread(dummy):
     last_status_update = 0
@@ -215,6 +225,7 @@ def message_thread(dummy):
 
         time.sleep(0.1)
 
+
 class NotificationFetcher(dbus.service.Object):
     _id = 0
 
@@ -231,9 +242,9 @@ class NotificationFetcher(dbus.service.Object):
             notification_id = self._id
 
         text = ("%s %s" % (summary, body)).strip()
-        add_notification( [notification_id,
+        add_notification([notification_id,
                           text[:NOTIFICATION_MAX_LENGTH],
-                          int(expire_timeout) / 1000.0] )
+                          int(expire_timeout) / 1000.0])
         return notification_id
 
     @dbus.service.method("org.freedesktop.Notifications", in_signature='', out_signature='as')
@@ -250,7 +261,8 @@ class NotificationFetcher(dbus.service.Object):
 
     @dbus.service.method("org.freedesktop.Notifications", in_signature='', out_signature='ssss')
     def GetServerInformation(self):
-      return ("statnot", "http://code.k2h.se", "0.0.2", "1")
+        return ("statnot", "http://code.k2h.se", "0.0.2", "1")
+
 
 def main():
     for curarg in sys.argv[1:]:
