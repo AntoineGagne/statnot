@@ -288,7 +288,8 @@ def _parse_arguments():
                   This configuration file must be written in valid python,
                   which will be read if the filename is given on the command line.
                   You do only need to set the variables you want to change, and can
-                  leave the rest out.\n
+                  leave the rest out.
+                  
                   Below is an example of a configuration which sets the defaults.
                   
                   # Default time a notification is show, unless specified in notification
@@ -317,7 +318,8 @@ def _parse_arguments():
                   
                   # update_text(text) is called when the status text should be updated
                   # If there is a pending notification to be formatted, it is appended as
-                  # the final argument to the STATUS_COMMAND, e.g. as $1 in default shellscript\n
+                  # the final argument to the STATUS_COMMAND, e.g. as $1 in default shellscript
+                  
                   # dwm statusbar update
                   import subprocess
                   def update_text(text):
@@ -335,7 +337,7 @@ def _parse_arguments():
         'configuration_file',
         type=str,
         metavar='FILENAME',
-        help='use the given configuration file (see the end of this prompt for an example)'
+        help='name of the configuration file (see the end of this prompt for an example)'
     )
     parser.set_defaults(function=readconfig)
 
