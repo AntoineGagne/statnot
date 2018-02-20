@@ -343,6 +343,7 @@ def _parse_arguments():
 
 
 def main():
+    """Main entry point of the application."""
     arguments = _parse_arguments()
     arguments.function(arguments.configuration_file)
 
