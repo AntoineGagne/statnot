@@ -59,9 +59,19 @@ DEFAULT_NOTIFY_TIMEOUT = 3000  # milliseconds
 MAX_NOTIFY_TIMEOUT = 5000  # milliseconds
 NOTIFICATION_MAX_LENGTH = 100  # number of characters
 STATUS_UPDATE_INTERVAL = 2.0  # seconds
-STATUS_COMMAND = ["/bin/sh", "%s/.statusline.sh" % os.getenv("HOME")]
+STATUS_COMMAND = ['/bin/sh', '%s/.statusline.sh' % os.getenv('HOME')]
 USE_STATUSTEXT = True
 QUEUE_NOTIFICATIONS = True
+SETTINGS = (
+    'DEFAULT_NOTIFY_TIMEOUT',
+    'MAX_NOTIFY_TIMEOUT',
+    'NOTIFICATION_MAX_LENGTH',
+    'STATUS_UPDATE_INTERVAL',
+    'STATUS_COMMAND',
+    'USE_STATUSTEXT',
+    'QUEUE_NOTIFICATIONS',
+    'update_text'
+)
 
 VERSION = '0.0.4'
 
@@ -70,7 +80,7 @@ VERSION = '0.0.4'
 def update_text(text):
     # Get first line
     first_line = text.splitlines()[0] if text else ''
-    subprocess.call(["xsetroot", "-name", first_line])
+    subprocess.call(['xsetroot', '-name', first_line])
 
 
 # ===== CONFIGURATION END =====
@@ -84,20 +94,19 @@ def _getconfigvalue(configmodule, name, default):
 def readconfig(filename):
     import imp
     try:
-        config = imp.load_source("config", filename)
+        config = imp.load_source('config', filename)
     except Exception as e:
-        print "Error: failed to read config file %s" % filename
+        print 'Error: failed to read config file %s' % filename
         print e
         sys.exit(2)
 
-    for setting in ("DEFAULT_NOTIFY_TIMEOUT", "MAX_NOTIFY_TIMEOUT", "NOTIFICATION_MAX_LENGTH", "STATUS_UPDATE_INTERVAL",
-                    "STATUS_COMMAND", "USE_STATUSTEXT", "QUEUE_NOTIFICATIONS", "update_text"):
+    for setting in SETTINGS:
         if hasattr(config, setting):
             globals()[setting] = getattr(config, setting)
 
 
 def strip_tags(value):
-    "Return the given HTML with all tags stripped."
+    """Return the given HTML with all tags stripped."""
     return re.sub(r'<[^>]*?>', '', value)
 
 
@@ -105,7 +114,7 @@ def strip_tags(value):
 # also on http://snippets.dzone.com/posts/show/4569
 def substitute_entity(match):
     ent = match.group(3)
-    if match.group(1) == "#":
+    if match.group(1) == '#':
         if match.group(2) == '':
             return unichr(int(ent))
         elif match.group(2) == 'x':
@@ -174,7 +183,7 @@ def get_statustext(notification=''):
 
         output = p.stdout.read()
     except:
-        sys.stderr.write("%s: could not read status message (%s)\n"
+        sys.stderr.write('%s: could not read status message (%s)\n'
                          % (sys.argv[0], ' '.join(STATUS_COMMAND)))
 
     # Error - STATUS_COMMAND didn't exist or delivered empty result
@@ -238,7 +247,7 @@ def message_thread(dummy):
 class NotificationFetcher(dbus.service.Object):
     _id = 0
 
-    @dbus.service.method("org.freedesktop.Notifications",
+    @dbus.service.method('org.freedesktop.Notifications',
                          in_signature='susssasa{ss}i',
                          out_signature='u')
     def Notify(self, app_name, notification_id, app_icon,
@@ -250,13 +259,13 @@ class NotificationFetcher(dbus.service.Object):
             self._id += 1
             notification_id = self._id
 
-        text = ("%s %s" % (summary, body)).strip()
+        text = ('%s %s' % (summary, body)).strip()
         add_notification([notification_id,
                           text[:NOTIFICATION_MAX_LENGTH],
                           int(expire_timeout) / 1000.0])
         return notification_id
 
-    @dbus.service.method("org.freedesktop.Notifications", in_signature='', out_signature='as')
+    @dbus.service.method('org.freedesktop.Notifications', in_signature='', out_signature='as')
     def GetCapabilities(self):
         return "body"
 
@@ -264,13 +273,13 @@ class NotificationFetcher(dbus.service.Object):
     def NotificationClosed(self, id_in, reason_in):
         pass
 
-    @dbus.service.method("org.freedesktop.Notifications", in_signature='u', out_signature='')
+    @dbus.service.method('org.freedesktop.Notifications', in_signature='u', out_signature='')
     def CloseNotification(self, id):
         pass
 
-    @dbus.service.method("org.freedesktop.Notifications", in_signature='', out_signature='ssss')
+    @dbus.service.method('org.freedesktop.Notifications', in_signature='', out_signature='ssss')
     def GetServerInformation(self):
-        return "statnot", "http://code.k2h.se", "0.0.2", "1"
+        return 'statnot', 'http://code.k2h.se', '0.0.2', '1'
 
 
 def _parse_arguments():
@@ -350,7 +359,7 @@ def main():
 
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
     session_bus = dbus.SessionBus()
-    name = dbus.service.BusName("org.freedesktop.Notifications", session_bus)
+    name = dbus.service.BusName('org.freedesktop.Notifications', session_bus)
     nf = NotificationFetcher(session_bus, '/org/freedesktop/Notifications')
 
     # We must use contexts and iterations to run threads
