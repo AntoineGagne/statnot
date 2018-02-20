@@ -17,7 +17,7 @@ replacement for lightweight window managers like `dwm
 `wmii <http://wmii.suckless.org>`__. It receives and displays
 notifications from the widely used `Desktop
 Notifications <http://www.galago-project.org/specs/notification/0.9/index.html>`__
-speficiation.
+specification.
 
 -  `source repository <http://github.com/halhen/statnot/>`__
 
