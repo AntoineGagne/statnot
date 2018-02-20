@@ -36,13 +36,20 @@ import dbus
 import dbus.service
 import dbus.mainloop.glib
 import gobject
+
 import os
+import re
 import subprocess
 import sys
+import textwrap
 import thread
 import time
+
+from argparse import (
+    ArgumentParser,
+    RawDescriptionHelpFormatter
+)
 from htmlentitydefs import name2codepoint as n2cp
-import re
 
 # ===== CONFIGURATION DEFAULTS =====
 #
@@ -55,6 +62,8 @@ STATUS_UPDATE_INTERVAL = 2.0  # seconds
 STATUS_COMMAND = ["/bin/sh", "%s/.statusline.sh" % os.getenv("HOME")]
 USE_STATUSTEXT = True
 QUEUE_NOTIFICATIONS = True
+
+VERSION = '0.0.4'
 
 
 # dwm
@@ -264,61 +273,78 @@ class NotificationFetcher(dbus.service.Object):
         return ("statnot", "http://code.k2h.se", "0.0.2", "1")
 
 
+def _parse_arguments():
+    parser = ArgumentParser(
+        formatter_class=RawDescriptionHelpFormatter,
+        prog='statnot',
+        description=('Lightweight notification-(to-become)-deamon intended to be used '
+                     'with lightweight WMs, like dwm.'),
+        epilog=(
+            textwrap.dedent(
+                '''
+                configuration:
+
+                  A file can be read to set the configuration.
+                  This configuration file must be written in valid python,
+                  which will be read if the filename is given on the command line.
+                  You do only need to set the variables you want to change, and can
+                  leave the rest out.\n
+                  Below is an example of a configuration which sets the defaults.
+                  
+                  # Default time a notification is show, unless specified in notification
+                  DEFAULT_NOTIFY_TIMEOUT = 3000 # milliseconds
+                  
+                  # Maximum time a notification is allowed to show
+                  MAX_NOTIFY_TIMEOUT = 5000 # milliseconds
+                  
+                  # Maximum number of characters in a notification. 
+                  NOTIFICATION_MAX_LENGTH = 100 # number of characters
+                  
+                  # Time between regular status updates
+                  STATUS_UPDATE_INTERVAL = 2.0 # seconds
+                  
+                  # Command to fetch status text from. We read from stdout.
+                  # Each argument must be an element in the array
+                  # os must be imported to use os.getenv
+                  import os
+                  STATUS_COMMAND = ['/bin/sh', '%s/.statusline.sh' % os.getenv('HOME')] 
+                  # Always show text from STATUS_COMMAND? If false, only show notifications
+                  USE_STATUSTEXT=True
+                  
+                  # Put incoming notifications in a queue, so each one is shown.
+                  # If false, the most recent notification is shown directly.
+                  QUEUE_NOTIFICATIONS=True
+                  
+                  # update_text(text) is called when the status text should be updated
+                  # If there is a pending notification to be formatted, it is appended as
+                  # the final argument to the STATUS_COMMAND, e.g. as $1 in default shellscript\n
+                  # dwm statusbar update
+                  import subprocess
+                  def update_text(text):
+                      subprocess.call(['xsetroot', '-name', text])'''
+            )
+        )
+    )
+    parser.add_argument(
+        '-v',
+        '--version',
+        action='version',
+        version='%(prog)s {version}'.format(version=VERSION)
+    )
+    parser.add_argument(
+        'configuration_file',
+        type=str,
+        metavar='FILENAME',
+        help='use the given configuration file (see the end of this prompt for an example)'
+    )
+    parser.set_defaults(function=readconfig)
+
+    return parser.parse_args()
+
+
 def main():
-    for curarg in sys.argv[1:]:
-        if curarg in ('-v', '--version'):
-            print "%s CURVERSION" % sys.argv[0]
-            sys.exit(1)
-        elif curarg in ('-h', '--help'):
-            print "  Usage: %s [-h] [--help] [-v] [--version] [configuration file]" % sys.argv[0]
-            print "    -h, --help:    Print this help and exit"
-            print "    -v, --version: Print version and exit"
-            print ""
-            print "  Configuration:"
-            print "    A file can be read to set the configuration."
-            print "    This configuration file must be written in valid python,"
-            print "    which will be read if the filename is given on the command line."
-            print "    You do only need to set the variables you want to change, and can"
-            print "    leave the rest out."
-            print ""
-            print "    Below is an example of a configuration which sets the defaults."
-            print ""
-            print "      # Default time a notification is show, unless specified in notification"
-            print "      DEFAULT_NOTIFY_TIMEOUT = 3000 # milliseconds"
-            print "      "
-            print "      # Maximum time a notification is allowed to show"
-            print "      MAX_NOTIFY_TIMEOUT = 5000 # milliseconds"
-            print "      "
-            print "      # Maximum number of characters in a notification. "
-            print "      NOTIFICATION_MAX_LENGTH = 100 # number of characters"
-            print "      "
-            print "      # Time between regular status updates"
-            print "      STATUS_UPDATE_INTERVAL = 2.0 # seconds"
-            print "      "
-            print "      # Command to fetch status text from. We read from stdout."
-            print "      # Each argument must be an element in the array"
-            print "      # os must be imported to use os.getenv"
-            print "      import os"
-            print "      STATUS_COMMAND = ['/bin/sh', '%s/.statusline.sh' % os.getenv('HOME')] "
-            print ""
-            print "      # Always show text from STATUS_COMMAND? If false, only show notifications"
-            print "      USE_STATUSTEXT=True"
-            print "      "
-            print "      # Put incoming notifications in a queue, so each one is shown."
-            print "      # If false, the most recent notification is shown directly."
-            print "      QUEUE_NOTIFICATIONS=True"
-            print "      "
-            print "      # update_text(text) is called when the status text should be updated"
-            print "      # If there is a pending notification to be formatted, it is appended as"
-            print "      # the final argument to the STATUS_COMMAND, e.g. as $1 in default shellscript"
-            print ""
-            print "      # dwm statusbar update"
-            print "      import subprocess"
-            print "      def update_text(text):"
-            print "          subprocess.call(['xsetroot', '-name', text])"
-            sys.exit(1)
-        else:
-            readconfig(curarg)
+    arguments = _parse_arguments()
+    arguments.function(arguments.configuration_file)
 
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
     session_bus = dbus.SessionBus()
